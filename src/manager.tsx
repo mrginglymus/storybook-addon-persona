@@ -1,39 +1,67 @@
 import React from "react";
 import { addons, types } from "storybook/manager-api";
-
-import { Panel } from "./components/Panel";
-import { Tab } from "./components/Tab";
 import { Tool } from "./components/Tool";
-import { ADDON_ID, PANEL_ID, TAB_ID, TOOL_ID } from "./constants";
+import { ADDON_ID, CONFIG_KEY, PARAM_KEY, TOOL_ID } from "./constants";
+import defaultPersonas from "./defaultPersonas";
+import type { Globals } from "storybook/internal/csf";
+import type { API_FilterFunction } from "storybook/internal/types";
+import type { Persona } from "./types";
+import { GLOBALS_UPDATED } from "storybook/internal/core-events";
 
 /**
  * Note: if you want to use JSX in this file, rename it to `manager.tsx`
  * and update the entry prop in tsup.config.ts to use "src/manager.tsx",
  */
 
+addons.setConfig({
+  [CONFIG_KEY]: defaultPersonas,
+});
+
+function filter(personaId: Globals["persona"]): API_FilterFunction {
+  const { [CONFIG_KEY]: personas } = addons.getConfig() as {
+    [CONFIG_KEY]: Persona[];
+  };
+  const persona = personas.find((p) => p.id === personaId);
+  console.log("Found persona", persona, personaId);
+  if (!persona) {
+    return () => true;
+  }
+
+  return function (item) {
+    const matchesFilter = persona.filter?.(item) ?? true;
+
+    const matchesType =
+      item.type === "docs"
+        ? !!persona.docs
+        : item.type === "story"
+          ? !!persona.story
+          : true;
+
+    const matchesTags = persona.tags
+      ? persona.tags.some((t) => item.tags?.includes(t))
+      : true;
+
+    console.log(item, matchesFilter, matchesType, matchesTags);
+
+    return matchesFilter && matchesType && matchesTags;
+  };
+}
+
 // Register the addon
 addons.register(ADDON_ID, (api) => {
-  // Register a tool
+  void api.experimental_setFilter(ADDON_ID, filter("default"));
+  api.on(
+    GLOBALS_UPDATED,
+    ({ globals: { [PARAM_KEY]: persona } }: { globals: Globals }) => {
+      console.log("globals updated", persona);
+      if (persona) {
+        void api.experimental_setFilter(ADDON_ID, filter(persona));
+      }
+    },
+  );
   addons.add(TOOL_ID, {
     type: types.TOOL,
-    title: "My addon",
-    match: ({ viewMode, tabId }) =>
-      !!((viewMode && viewMode.match(/^(story)$/)) || tabId === TAB_ID),
+    title: "Persona switcher",
     render: () => <Tool api={api} />,
-  });
-
-  // Register a panel
-  addons.add(PANEL_ID, {
-    type: types.PANEL,
-    title: "My addon",
-    match: ({ viewMode }) => viewMode === "story",
-    render: ({ active }) => <Panel active={active} />,
-  });
-
-  // Register a tab
-  addons.add(TAB_ID, {
-    type: types.TAB,
-    title: "My addon",
-    render: ({ active }) => <Tab active={active} />,
   });
 });

@@ -55,3 +55,11 @@ export const Small: Story = {
     label: "Button",
   },
 };
+
+export const Test: Story = {
+  args: {
+    primary: true,
+    label: "Button",
+  },
+  tags: ["!dev"],
+};

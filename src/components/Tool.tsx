@@ -1,40 +1,46 @@
-import React, { memo, useCallback, useEffect } from "react";
-import { useGlobals, type API } from "storybook/manager-api";
-import { IconButton } from "storybook/internal/components";
-import { ADDON_ID, KEY, TOOL_ID } from "../constants";
-import { LightningIcon } from "@storybook/icons";
+import React, { memo } from "react";
+import { type API, useGlobals } from "storybook/manager-api";
+import {
+  IconButton,
+  TooltipLinkList,
+  WithTooltip,
+} from "storybook/internal/components";
+import { CONFIG_KEY, PARAM_KEY, TOOL_ID } from "../constants";
+import { UsersIcon } from "@storybook/icons";
+import { addons } from "storybook/manager-api";
+import type { Persona } from "../types";
 
 export const Tool = memo(function MyAddonSelector({ api }: { api: API }) {
-  const [globals, updateGlobals, storyGlobals] = useGlobals();
+  const [globals, updateGlobals] = useGlobals();
 
-  const isLocked = KEY in storyGlobals;
-  const isActive = !!globals[KEY];
+  const currentPersona = globals[PARAM_KEY];
 
-  const toggle = useCallback(() => {
-    updateGlobals({
-      [KEY]: !isActive,
-    });
-  }, [isActive]);
-
-  useEffect(() => {
-    api.setAddonShortcut(ADDON_ID, {
-      label: "Toggle Measure [O]",
-      defaultShortcut: ["O"],
-      actionName: "outline",
-      showInMenu: false,
-      action: toggle,
-    });
-  }, [toggle, api]);
+  const { [CONFIG_KEY]: personas } = addons.getConfig() as {
+    [CONFIG_KEY]: Persona[];
+  };
 
   return (
-    <IconButton
+    <WithTooltip
       key={TOOL_ID}
-      active={isActive}
-      disabled={isLocked}
-      title="Enable my addon"
-      onClick={toggle}
+      placement="bottom"
+      tooltip={({ onHide }) => (
+        <TooltipLinkList
+          links={personas.map(({ id, name }) => ({
+            key: id,
+            id: id,
+            title: name,
+            active: id === currentPersona,
+            onClick() {
+              updateGlobals({ [PARAM_KEY]: id });
+              onHide();
+            },
+          }))}
+        />
+      )}
     >
-      <LightningIcon />
-    </IconButton>
+      <IconButton title="Switch persona">
+        <UsersIcon />
+      </IconButton>
+    </WithTooltip>
   );
 });

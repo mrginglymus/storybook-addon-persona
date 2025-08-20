@@ -9,20 +9,21 @@
  * https://storybook.js.org/docs/react/writing-stories/decorators
  */
 import type { ProjectAnnotations, Renderer } from "storybook/internal/types";
+import { PARAM_KEY } from "./constants";
+import defaultPersonas from "./defaultPersonas";
 
-import { KEY } from "./constants";
-import { withGlobals } from "./withGlobals";
-import { withRoundTrip } from "./withRoundTrip";
-
-/**
- * Note: if you want to use JSX in this file, rename it to `preview.tsx`
- * and update the entry prop in tsup.config.ts to use "src/preview.tsx",
- */
+declare module "storybook/internal/types" {
+  interface Globals {
+    persona?: string;
+  }
+}
 
 const preview: ProjectAnnotations<Renderer> = {
-  decorators: [withGlobals, withRoundTrip],
   initialGlobals: {
-    [KEY]: false,
+    [PARAM_KEY]: defaultPersonas[0]?.id,
+  },
+  globalTypes: {
+    [PARAM_KEY]: {},
   },
 };
 
