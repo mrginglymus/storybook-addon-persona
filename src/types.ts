@@ -1,10 +1,5 @@
 import type { API_FilterFunction, IndexEntry } from "storybook/internal/types";
 
-export interface Result {
-  divs: DOMRect[];
-  styled: DOMRect[];
-}
-
 export interface Persona {
   id: string;
   /**

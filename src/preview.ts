@@ -9,22 +9,7 @@
  * https://storybook.js.org/docs/react/writing-stories/decorators
  */
 import type { ProjectAnnotations, Renderer } from "storybook/internal/types";
-import { PARAM_KEY } from "./constants";
-import defaultPersonas from "./defaultPersonas";
 
-declare module "storybook/internal/types" {
-  interface Globals {
-    persona?: string;
-  }
-}
-
-const preview: ProjectAnnotations<Renderer> = {
-  initialGlobals: {
-    [PARAM_KEY]: defaultPersonas[0]?.id,
-  },
-  globalTypes: {
-    [PARAM_KEY]: {},
-  },
-};
+const preview: ProjectAnnotations<Renderer> = {};
 
 export default preview;
