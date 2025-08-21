@@ -9,13 +9,14 @@ import { CONFIG_KEY, PARAM_KEY, TOOL_ID } from "../constants";
 import { UsersIcon } from "@storybook/icons";
 import { addons } from "storybook/manager-api";
 import type { Persona } from "../types";
+import defaultPersonas from "../defaultPersonas";
 
 export const Tool = memo(function MyAddonSelector({ api }: { api: API }) {
   const [globals, updateGlobals] = useGlobals();
 
   const currentPersona = globals[PARAM_KEY];
 
-  const { [CONFIG_KEY]: personas } = addons.getConfig() as {
+  const { [CONFIG_KEY]: personas = defaultPersonas } = addons.getConfig() as {
     [CONFIG_KEY]: Persona[];
   };
 

@@ -13,16 +13,12 @@ import { GLOBALS_UPDATED } from "storybook/internal/core-events";
  * and update the entry prop in tsup.config.ts to use "src/manager.tsx",
  */
 
-addons.setConfig({
-  [CONFIG_KEY]: defaultPersonas,
-});
-
 function filter(personaId: Globals["persona"]): API_FilterFunction {
-  const { [CONFIG_KEY]: personas } = addons.getConfig() as {
+  const { [CONFIG_KEY]: personas = defaultPersonas } = addons.getConfig() as {
     [CONFIG_KEY]: Persona[];
   };
   const persona = personas.find((p) => p.id === personaId);
-  console.log("Found persona", persona, personaId);
+
   if (!persona) {
     return () => true;
   }
@@ -30,18 +26,10 @@ function filter(personaId: Globals["persona"]): API_FilterFunction {
   return function (item) {
     const matchesFilter = persona.filter?.(item) ?? true;
 
-    const matchesType =
-      item.type === "docs"
-        ? !!persona.docs
-        : item.type === "story"
-          ? !!persona.story
-          : true;
+    const matchesType = persona.types?.includes(item.type) ?? true;
 
-    const matchesTags = persona.tags
-      ? persona.tags.some((t) => item.tags?.includes(t))
-      : true;
-
-    console.log(item, matchesFilter, matchesType, matchesTags);
+    const matchesTags =
+      persona.tags?.some((t) => item.tags?.includes(t)) ?? true;
 
     return matchesFilter && matchesType && matchesTags;
   };
@@ -53,7 +41,6 @@ addons.register(ADDON_ID, (api) => {
   api.on(
     GLOBALS_UPDATED,
     ({ globals: { [PARAM_KEY]: persona } }: { globals: Globals }) => {
-      console.log("globals updated", persona);
       if (persona) {
         void api.experimental_setFilter(ADDON_ID, filter(persona));
       }

@@ -1,4 +1,4 @@
-import type { API_FilterFunction } from "storybook/internal/types";
+import type { API_FilterFunction, IndexEntry } from "storybook/internal/types";
 
 export interface Result {
   divs: DOMRect[];
@@ -12,17 +12,9 @@ export interface Persona {
    */
   name: string;
   /**
-   * Set false to hide docs for this persona
-   *
-   * @default true
+   * Only include items with matching types
    */
-  story?: boolean;
-  /**
-   * Set false to hide stories for this persona
-   *
-   * @default true;
-   */
-  docs?: boolean;
+  types?: IndexEntry["type"][];
   /**
    * Only include stories with the following tags
    */

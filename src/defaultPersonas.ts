@@ -1,23 +1,20 @@
 import type { Persona } from "./types";
 
-export default [
+const defaultPersonas: Persona[] = [
   {
     id: "default",
     name: "Default",
-    docs: true,
-    story: false,
+    types: ["docs"],
   },
   {
     id: "dev",
     name: "Dev",
-    docs: true,
-    story: true,
     tags: ["dev"],
   },
   {
     id: "qa",
     name: "QA",
-    docs: true,
-    story: true,
   },
-] satisfies Persona[];
+];
+
+export default defaultPersonas;
